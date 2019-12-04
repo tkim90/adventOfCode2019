@@ -20,15 +20,54 @@
 
 const modulesMass = require('./day1_data.js');
 
-const calculateFuelRequirement = (input) => {
-  function calculateFuel(mass) {
-    return Math.floor(mass / 3) - 2;
-  }
-
+const calculateFuelRequirement1 = (input) => {
   return input.reduce((total, moduleMass) => total += calculateFuel(moduleMass), 0);
 };
 
-let result = calculateFuelRequirement(modulesMass.mass_data);
+function calculateFuel(mass) {
+  return Math.floor(mass / 3) - 2;
+}
+
+let result = calculateFuelRequirement1(modulesMass.mass_data);
 console.log(`Part one: ${result}`); // 3159380
 
 // ---PART TWO---
+// Each fuel requires has its own fuel requirements.
+// EXAMPLE
+// A module of mass 14 requires 2 fuel. 
+  // This fuel requires no further fuel (2 divided by 3 and rounded down is 0, which would call for a negative fuel), 
+  // so the total fuel required is still just 2.
+// At first, a module of mass 1969 requires 654 fuel.
+// Then, this fuel requires 216 more fuel (654 / 3 - 2). 
+  // 216 then requires 70 more fuel, which requires 21 fuel, which requires 5 fuel, which requires no further fuel.
+  // So, the total fuel required for a module of mass 1969 is 654 + 216 + 70 + 21 + 5 = 966.
+// The fuel required by a module of mass 100756 and its fuel is: 33583 + 11192 + 3728 + 1240 + 411 + 135 + 43 + 12 + 2 = 50346.
+
+// Base: fuel is negative or zero -> return
+// Recursive: 
+  // calculate fuel requirements
+  // add current call stack's fuel calculation to total
+  // recurse on resulting fuel, passing in total so far
+
+const calculateMetaFuel = (input) => {
+  let total = 0;
+  let currentFuel = 0;
+
+  const helper = (fuel) => {
+    
+    currentFuel = calculateFuel(fuel);
+    if (currentFuel <= 0) return ;
+    total += currentFuel;
+    helper(currentFuel);
+  }
+
+  helper(input);
+  return total;
+};
+
+const calculateFuelRequirement2 = (input) => {
+  return input.reduce((total, moduleMass) => total += calculateMetaFuel(moduleMass), 0);
+};
+
+
+console.log(calculateFuelRequirement2(modulesMass.mass_data));
